@@ -27,7 +27,6 @@
 		"@threlte/core": "^8.3.1",
 		"@threlte/extras": "^9.7.1",
 		"@types/three": "^0.182.0",
-		"resend": "^6.9.2",
 		"three": "^0.182.0",
 		"tone": "^15.1.22"
 	}

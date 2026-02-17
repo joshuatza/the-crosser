@@ -1,10 +1,9 @@
 import { json } from '@sveltejs/kit';
-import { Resend } from 'resend';
-import { RESEND_API_KEY } from '$env/static/private';
+import { sendEmail } from '$lib/server/mail';
 import type { RequestHandler } from './$types';
 
-const resend = new Resend(RESEND_API_KEY);
 const CLOUDFLARE_ORIGIN = 'https://the-crosser.pages.dev';
+const FROM_EMAIL = 'noreply@the-crosser.pages.dev';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	try {
@@ -41,9 +40,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			}));
 
 			// Email 1: Notify Joshua
-			await resend.emails.send({
-				from: 'The Crosser <onboarding@resend.dev>',
+			await sendEmail({
 				to: 'joshuatwycross@gmail.com',
+				from: FROM_EMAIL,
+				fromName: 'The Crosser',
 				subject: `New story commission from ${name}`,
 				html: `
 					<h2>New Story Commission</h2>
@@ -62,29 +62,33 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			});
 
 			// Email 2: Confirmation to the requester
-			await resend.emails.send({
-				from: 'The Crosser <onboarding@resend.dev>',
-				to: email,
-				subject: 'Your story request has been received',
-				html: `
-					<div style="font-family: Georgia, serif; color: #e8e0d0; background: #0a0a0f; padding: 2.5rem; max-width: 520px;">
-						<h2 style="font-weight: 300; letter-spacing: 0.05em; color: #e8e0d0; margin-bottom: 1.5rem;">Your Story Request</h2>
-						<p style="line-height: 1.8; color: #999;">Hi ${name},</p>
-						<p style="line-height: 1.8; color: #999;">
-							Thank you for trusting me with your story. I've received your request and will review it carefully.
-						</p>
-						<p style="line-height: 1.8; color: #999;">
-							I'll be in touch soon to discuss the next steps.
-						</p>
-						<p style="line-height: 1.8; color: #c4a265; margin-top: 2rem; font-style: italic;">
-							Every story deserves to be carried.
-						</p>
-						<p style="line-height: 1.8; color: #999; margin-top: 1.5rem;">— Joshua</p>
-					</div>
-				`
-			});
+			try {
+				await sendEmail({
+					to: email,
+					from: FROM_EMAIL,
+					fromName: 'The Crosser',
+					subject: 'Your story request has been received',
+					html: `
+						<div style="font-family: Georgia, serif; color: #e8e0d0; background: #0a0a0f; padding: 2.5rem; max-width: 520px;">
+							<h2 style="font-weight: 300; letter-spacing: 0.05em; color: #e8e0d0; margin-bottom: 1.5rem;">Your Story Request</h2>
+							<p style="line-height: 1.8; color: #999;">Hi ${name},</p>
+							<p style="line-height: 1.8; color: #999;">
+								Thank you for trusting me with your story. I've received your request and will review it carefully.
+							</p>
+							<p style="line-height: 1.8; color: #999;">
+								I'll be in touch soon to discuss the next steps.
+							</p>
+							<p style="line-height: 1.8; color: #c4a265; margin-top: 2rem; font-style: italic;">
+								Every story deserves to be carried.
+							</p>
+							<p style="line-height: 1.8; color: #999; margin-top: 1.5rem;">— Joshua</p>
+						</div>
+					`
+				});
+			} catch (_) {
+				// Don't fail the commission if confirmation email fails
+			}
 		} else {
-			// Not on Cloudflare — proxy to Cloudflare
 			const res = await fetch(`${CLOUDFLARE_ORIGIN}/api/commission`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
