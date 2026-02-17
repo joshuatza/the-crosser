@@ -112,6 +112,9 @@
 				<div class="notify-label">Get notified</div>
 				{#if submitted}
 					<div class="notify-thanks">You'll be the first to know.</div>
+					<a href="/commission" class="commission-link" on:click|stopPropagation={close}>
+						Want your own story like this?
+					</a>
 				{:else}
 					<form class="notify-form" on:submit={handleNotify}>
 						<!-- Honeypot — hidden from real users, bots fill it -->
@@ -376,5 +379,21 @@
 		font-size: 0.65rem;
 		color: #d6075c;
 		opacity: 0.8;
+	}
+
+	.commission-link {
+		display: block;
+		margin-top: 0.8rem;
+		font-family: 'Cormorant Garamond', serif;
+		font-size: 0.8rem;
+		font-style: italic;
+		color: var(--gold);
+		text-decoration: none;
+		opacity: 0.6;
+		transition: opacity 0.3s ease;
+	}
+
+	.commission-link:hover {
+		opacity: 1;
 	}
 </style>
