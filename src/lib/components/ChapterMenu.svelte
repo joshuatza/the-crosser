@@ -382,18 +382,21 @@
 	}
 
 	.commission-link {
-		display: block;
-		margin-top: 0.8rem;
+		display: inline-block;
+		margin-top: 1rem;
+		padding: 0.5rem 0.8rem;
 		font-family: 'Cormorant Garamond', serif;
-		font-size: 0.8rem;
+		font-size: 0.85rem;
 		font-style: italic;
 		color: var(--gold);
 		text-decoration: none;
-		opacity: 0.6;
-		transition: opacity 0.3s ease;
+		border: 1px solid rgba(196, 162, 101, 0.2);
+		border-radius: 3px;
+		transition: all 0.3s ease;
 	}
 
 	.commission-link:hover {
-		opacity: 1;
+		background: rgba(196, 162, 101, 0.08);
+		border-color: var(--gold);
 	}
 </style>
