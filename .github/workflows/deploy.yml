@@ -28,6 +28,25 @@ jobs:
       - name: Install dependencies
         run: npm ci --force
 
+      - name: Install static adapter
+        run: npm install @sveltejs/adapter-static --force
+
+      - name: Swap to static adapter for GitHub Pages
+        run: |
+          cat > svelte.config.js << 'CONF'
+          import adapter from '@sveltejs/adapter-static';
+          const config = {
+            kit: {
+              adapter: adapter({ pages: 'build', assets: 'build', fallback: undefined, precompress: false, strict: false }),
+              paths: { base: '/the-crosser' }
+            }
+          };
+          export default config;
+          CONF
+
+      - name: Remove server routes (static build)
+        run: rm -rf src/routes/api
+
       - name: Build
         run: npm run build
 
