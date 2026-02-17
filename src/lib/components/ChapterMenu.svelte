@@ -42,8 +42,18 @@
 
 		submitting = true;
 		try {
-			// TODO: Replace with your form endpoint (Formspree, Mailchimp, etc.)
-			// For now, store locally and show success
+			const res = await fetch('/api/notify', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, honeypot })
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				error = data.error || 'Something went wrong. Try again.';
+				return;
+			}
+
 			localStorage.setItem('crosser-notify-signed-up', email);
 			submitted = true;
 		} catch (_) {
