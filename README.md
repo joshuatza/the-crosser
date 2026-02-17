@@ -1,42 +1,38 @@
-# sv
+# The Crosser
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+**A Visual Journey** — an interactive story of blood, exile, and becoming.
 
-## Creating a project
+[Live site](https://joshuatza.github.io/the-crosser/)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## About
+
+The Crosser is an interactive web experience that tells the story of a boy removed from his land at nine months old, the father who drove him back, and the ancient fire carried through generations of blended blood and buried memory.
+
+Navigate through 32 scenes with generative ambient music that evolves as the story unfolds.
+
+**AI was used to write and narrate this story, but it is based on real life.**
+
+## How to experience
+
+- **Click** the right half of the screen to advance, left half to go back
+- **Swipe** left/right on mobile
+- **Arrow keys** or **Space** to navigate
+- **M** to mute/unmute
+- Best experienced with headphones
+
+## Built with
+
+- [SvelteKit](https://kit.svelte.dev/) — framework
+- [Three.js](https://threejs.org/) via [Threlte](https://threlte.xyz/) — particle system and 3D
+- [Tone.js](https://tonejs.github.io/) — generative ambient music engine
+
+## Development
 
 ```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv create --template minimal --types ts --no-install the-crosser
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm install --force
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## License
 
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+All rights reserved.
