@@ -81,9 +81,13 @@
 		<div class="confirmation">
 			<h1>Received</h1>
 			<p class="confirm-body">
-				Your story request has been sent. You'll receive a confirmation email shortly.
+				Your story request has been sent.
 			</p>
 			<p class="confirm-sub">Joshua will review your submission and be in touch.</p>
+			<p class="confirm-draft">
+				If you already have a draft or material you'd like to share, send it to
+				<a href="mailto:joshuatwycross@gmail.com" class="email-link">joshuatwycross@gmail.com</a>
+			</p>
 			<a href="/" class="back-link">Return to The Crosser</a>
 		</div>
 	</div>
@@ -135,6 +139,11 @@
 				<button type="submit" class="submit-btn" disabled={submitting}>
 					{submitting ? 'Sending...' : 'Submit your story request'}
 				</button>
+
+				<p class="draft-note">
+					Have a draft or material to share? Send it to
+					<a href="mailto:joshuatwycross@gmail.com" class="email-link">joshuatwycross@gmail.com</a>
+				</p>
 			</form>
 		</div>
 	</div>
@@ -336,6 +345,38 @@
 		letter-spacing: 0.15em;
 		color: var(--grey);
 		margin-bottom: 2.5rem;
+	}
+
+	.draft-note {
+		font-family: 'Cormorant Garamond', serif;
+		font-size: 0.9rem;
+		font-weight: 300;
+		font-style: italic;
+		color: var(--grey);
+		text-align: center;
+		margin-top: 0.5rem;
+	}
+
+	.confirm-draft {
+		font-family: 'Cormorant Garamond', serif;
+		font-size: 1rem;
+		font-weight: 300;
+		font-style: italic;
+		line-height: 1.8;
+		color: var(--grey);
+		margin-bottom: 2rem;
+	}
+
+	.email-link {
+		color: var(--gold);
+		text-decoration: none;
+		border-bottom: 1px solid rgba(196, 162, 101, 0.3);
+		padding-bottom: 1px;
+		transition: border-color 0.3s ease;
+	}
+
+	.email-link:hover {
+		border-color: var(--gold);
 	}
 
 	@media (max-width: 600px) {
