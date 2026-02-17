@@ -45,6 +45,8 @@ let started = false;
 let isMuted = false;
 let piano: any = null;
 let pad: any = null;
+let penSynth: any = null;
+let penFilter: any = null;
 let reverb: any = null;
 let delay: any = null;
 let filter: any = null;
@@ -80,6 +82,14 @@ export async function initMusic() {
 				volume: -28
 			}
 		}).connect(reverb);
+
+		// Pen scratch — filtered noise burst for typewriter effect
+		penFilter = new Tone.Filter({ frequency: 3500, type: "bandpass", Q: 0.8 }).connect(masterVol);
+		penSynth = new Tone.NoiseSynth({
+			noise: { type: "brown" },
+			envelope: { attack: 0.003, decay: 0.04, sustain: 0, release: 0.02 },
+			volume: -28
+		}).connect(penFilter);
 
 		started = true;
 		transitionTo(get(currentScene));
@@ -164,6 +174,18 @@ export function transitionChime(sceneIndex: number) {
 		if (isMuted) return;
 		try { piano.triggerAttackRelease(fifth, 3, Tone.now(), phase.velocity * 0.4); } catch (_) {}
 	}, 150);
+}
+
+export function penScratch() {
+	if (!started || isMuted || !penSynth) return;
+	try {
+		// Slight randomness in pitch and volume for organic feel
+		const freq = 2800 + Math.random() * 1400;
+		const vol = -30 + Math.random() * 6;
+		penFilter.frequency.value = freq;
+		penSynth.volume.value = vol;
+		penSynth.triggerAttackRelease(0.025 + Math.random() * 0.02);
+	} catch (_) {}
 }
 
 export function stopMusic() {

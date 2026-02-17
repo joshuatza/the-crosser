@@ -1,19 +1,97 @@
 <script lang="ts">
 	import { currentScene, transitioning } from '$lib/stores/scene';
 	import { scenes } from '$lib/data/scenes';
+	import { penScratch } from '$lib/stores/music';
 
 	$: scene = scenes[$currentScene];
 
 	let visible = false;
-	let textEl: HTMLDivElement;
+	let typedHTML = '';
+	let typeTimer: ReturnType<typeof setTimeout> | null = null;
 
-	// Re-trigger animation on scene change
+	function clearTypeTimer() {
+		if (typeTimer) { clearTimeout(typeTimer); typeTimer = null; }
+	}
+
+	// Parse HTML content into typeable tokens (words + tags)
+	function tokenize(html: string): string[] {
+		const tokens: string[] = [];
+		let i = 0;
+		while (i < html.length) {
+			if (html[i] === '<') {
+				// Capture entire tag
+				const end = html.indexOf('>', i);
+				if (end !== -1) {
+					tokens.push(html.slice(i, end + 1));
+					i = end + 1;
+				} else {
+					tokens.push(html[i]);
+					i++;
+				}
+			} else if (html[i] === ' ' || html[i] === '\n' || html[i] === '\t') {
+				tokens.push(html[i]);
+				i++;
+			} else {
+				// Capture word (text until next space or tag)
+				let word = '';
+				while (i < html.length && html[i] !== '<' && html[i] !== ' ' && html[i] !== '\n' && html[i] !== '\t') {
+					word += html[i];
+					i++;
+				}
+				tokens.push(word);
+			}
+		}
+		return tokens;
+	}
+
+	function typeContent(html: string) {
+		clearTypeTimer();
+		typedHTML = '';
+		visible = true;
+
+		const tokens = tokenize(html);
+		let idx = 0;
+
+		function typeNext() {
+			if (idx >= tokens.length) return;
+			const token = tokens[idx];
+			typedHTML += token;
+			idx++;
+
+			// Tags and whitespace appear instantly, words get the pen sound
+			const isTag = token.startsWith('<');
+			const isSpace = token.trim() === '';
+
+			if (!isTag && !isSpace) {
+				penScratch();
+			}
+
+			// Tags: no delay. Spaces: tiny delay. Words: typing speed.
+			let delay: number;
+			if (isTag) {
+				delay = 0;
+			} else if (isSpace) {
+				delay = 10;
+			} else {
+				delay = 30 + Math.random() * 30;
+			}
+
+			if (idx < tokens.length) {
+				typeTimer = setTimeout(typeNext, delay);
+			}
+		}
+
+		// Small delay before typing starts
+		typeTimer = setTimeout(typeNext, 400);
+	}
+
 	$: if (scene) {
+		clearTypeTimer();
 		visible = false;
-		// Use microtask to ensure the DOM updates before re-showing
+		typedHTML = '';
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
-				visible = true;
+				typeContent(scene.content);
 			});
 		});
 	}
@@ -21,12 +99,11 @@
 
 <div class="scene-container">
 	<div
-		bind:this={textEl}
 		class="scene-text"
 		class:visible
 		class:exit={$transitioning}
 	>
-		{@html scene.content}
+		{@html typedHTML}
 	</div>
 </div>
 
