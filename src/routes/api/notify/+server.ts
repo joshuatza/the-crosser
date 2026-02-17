@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				source: 'chapter-menu'
 			}));
 
-			// Send notification email
+			// Notify Joshua
 			await resend.emails.send({
 				from: 'The Crosser <onboarding@resend.dev>',
 				to: 'joshuatwycross@gmail.com',
@@ -37,6 +37,33 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				html: `
 					<p>Someone wants to be notified when the next chapter drops.</p>
 					<p><strong>Email:</strong> ${email}</p>
+				`
+			});
+
+			// Welcome email to subscriber
+			await resend.emails.send({
+				from: 'The Crosser <onboarding@resend.dev>',
+				to: email,
+				subject: 'You\'re in — The Crosser',
+				html: `
+					<div style="font-family: Georgia, serif; color: #e8e0d0; background: #0a0a0f; padding: 2.5rem; max-width: 520px;">
+						<h2 style="font-weight: 300; letter-spacing: 0.05em; color: #e8e0d0; margin-bottom: 1.5rem;">Welcome, Crosser.</h2>
+						<p style="line-height: 1.8; color: #999;">
+							You'll be the first to know when the next chapter is released.
+						</p>
+						<p style="line-height: 1.8; color: #999; margin-top: 1.5rem;">
+							In the meantime — want an interactive story like this written about <em style="color: #c4a265;">your</em> life?
+						</p>
+						<p style="margin-top: 1.5rem;">
+							<a href="${CLOUDFLARE_ORIGIN}/commission" style="color: #c4a265; text-decoration: none; border-bottom: 1px solid rgba(196,162,101,0.3); padding-bottom: 2px;">
+								Tell me your story →
+							</a>
+						</p>
+						<p style="line-height: 1.8; color: #c4a265; margin-top: 2rem; font-style: italic;">
+							Every story deserves to be carried.
+						</p>
+						<p style="line-height: 1.8; color: #999; margin-top: 1.5rem;">— Joshua</p>
+					</div>
 				`
 			});
 		} else {
