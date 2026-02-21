@@ -9,6 +9,7 @@ declare global {
 		interface Platform {
 			env?: {
 				SUBSCRIBERS: KVNamespace;
+				RESEND_API_KEY: string;
 			};
 		}
 	}
