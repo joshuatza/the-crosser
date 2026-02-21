@@ -5,13 +5,17 @@ export const prerender = false;
 
 const CLOUDFLARE_ORIGIN = 'https://the-crosser.pages.dev';
 
-export const POST: RequestHandler = async ({ request, platform }) => {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	try {
 		const body = await request.json();
-		const { name, email, subscriberEmail, story, experience, price, honeypot } = body;
+		const { name, email, story, experience, price, honeypot } = body;
 
 		if (honeypot) {
 			return json({ ok: true });
+		}
+
+		if (!locals.user) {
+			return json({ error: 'Please sign in first.' }, { status: 401 });
 		}
 
 		if (!name || !email || !story || !price) {
@@ -21,18 +25,12 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		const kv = platform?.env?.SUBSCRIBERS;
 
 		if (kv) {
-			// Verify subscriber exists
-			const sub = await kv.get(subscriberEmail || email);
-			if (!sub) {
-				return json({ error: 'Subscriber not found. Please sign up for notifications first.' }, { status: 403 });
-			}
-
 			// Store commission in KV
 			const id = `commission_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 			await kv.put(id, JSON.stringify({
 				name,
 				email,
-				subscriberEmail,
+				subscriberEmail: locals.user.email,
 				story,
 				experience,
 				price,

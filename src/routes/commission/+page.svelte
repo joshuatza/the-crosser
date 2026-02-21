@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
-	let authorized = false;
-	let subscriberEmail = '';
+	$: user = $page.data.user;
 
 	let name = '';
-	let email = '';
+	let email = user?.email ?? '';
 	let story = '';
 	let experience = '';
 	let price = '';
@@ -16,16 +14,10 @@
 	let submitted = false;
 	let error = '';
 
-	onMount(() => {
-		const stored = localStorage.getItem('crosser-notify-signed-up');
-		if (!stored) {
-			goto('/');
-			return;
-		}
-		authorized = true;
-		subscriberEmail = stored;
-		email = stored;
-	});
+	// Keep email in sync if user data loads after initial render
+	$: if (user?.email && !email) {
+		email = user.email;
+	}
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -45,7 +37,6 @@
 				body: JSON.stringify({
 					name: name.trim(),
 					email: email.trim(),
-					subscriberEmail,
 					story: story.trim(),
 					experience: experience.trim(),
 					price: price.trim(),
@@ -72,9 +63,12 @@
 	<title>Commission a Story — The Crosser</title>
 </svelte:head>
 
-{#if !authorized}
+{#if !user}
 	<div class="page">
-		<div class="loading">Verifying access...</div>
+		<div class="loading">
+			<p>You need to sign in to access this page.</p>
+			<a href="/" class="back-link">Return to The Crosser</a>
+		</div>
 	</div>
 {:else if submitted}
 	<div class="page">

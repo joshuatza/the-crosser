@@ -1,19 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { goToScene } from '$lib/stores/scene';
+	import { invalidateAll } from '$app/navigation';
 
 	let open = false;
 	let email = '';
 	let honeypot = '';
-	let submitted = false;
+	let magicLinkSent = false;
 	let submitting = false;
+	let signingOut = false;
 	let error = '';
 
-	onMount(() => {
-		if (localStorage.getItem('crosser-notify-signed-up')) {
-			submitted = true;
-		}
-	});
+	$: user = $page.data.user;
 
 	function toggle() {
 		open = !open;
@@ -32,7 +30,6 @@
 		e.preventDefault();
 		error = '';
 
-		// Honeypot check — bots fill hidden fields
 		if (honeypot) return;
 
 		if (!email || !email.includes('@')) {
@@ -54,12 +51,21 @@
 				return;
 			}
 
-			localStorage.setItem('crosser-notify-signed-up', email);
-			submitted = true;
+			magicLinkSent = true;
 		} catch (_) {
 			error = 'Something went wrong. Try again.';
 		} finally {
 			submitting = false;
+		}
+	}
+
+	async function handleSignOut() {
+		signingOut = true;
+		try {
+			await fetch('/api/auth/logout', { method: 'POST' });
+			await invalidateAll();
+		} finally {
+			signingOut = false;
 		}
 	}
 
@@ -109,15 +115,21 @@
 			</div>
 
 			<div class="notify-section">
-				<div class="notify-label">Get notified</div>
-				{#if submitted}
-					<div class="notify-thanks">You'll be the first to know.</div>
+				{#if user}
+					<div class="notify-label">Signed in</div>
+					<div class="signed-in-email">{user.email}</div>
 					<a href="/commission" class="commission-link" on:click|stopPropagation={close}>
 						Want your own story like this?
 					</a>
+					<button class="sign-out-btn" on:click|stopPropagation={handleSignOut} disabled={signingOut}>
+						{signingOut ? '...' : 'Sign out'}
+					</button>
+				{:else if magicLinkSent}
+					<div class="notify-label">Check your email</div>
+					<div class="notify-thanks">We sent a sign-in link to {email}</div>
 				{:else}
+					<div class="notify-label">Sign in</div>
 					<form class="notify-form" on:submit={handleNotify}>
-						<!-- Honeypot — hidden from real users, bots fill it -->
 						<input
 							type="text"
 							name="website"
@@ -134,7 +146,7 @@
 							disabled={submitting}
 						/>
 						<button type="submit" class="notify-btn" disabled={submitting}>
-							{submitting ? '...' : 'Notify me'}
+							{submitting ? '...' : 'Sign in / Subscribe'}
 						</button>
 						{#if error}
 							<div class="notify-error">{error}</div>
@@ -398,5 +410,40 @@
 	.commission-link:hover {
 		background: rgba(196, 162, 101, 0.08);
 		border-color: var(--gold);
+	}
+
+	.signed-in-email {
+		font-family: 'Outfit', sans-serif;
+		font-size: 0.7rem;
+		font-weight: 300;
+		color: var(--grey);
+		margin-bottom: 0.8rem;
+		word-break: break-all;
+	}
+
+	.sign-out-btn {
+		display: block;
+		margin-top: 0.8rem;
+		background: transparent;
+		border: none;
+		padding: 0;
+		font-family: 'Outfit', sans-serif;
+		font-size: 0.6rem;
+		font-weight: 300;
+		letter-spacing: 0.15em;
+		text-transform: uppercase;
+		color: var(--grey);
+		cursor: pointer;
+		opacity: 0.5;
+		transition: opacity 0.3s ease;
+	}
+
+	.sign-out-btn:hover {
+		opacity: 1;
+	}
+
+	.sign-out-btn:disabled {
+		cursor: default;
+		opacity: 0.3;
 	}
 </style>
