@@ -1,6 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
+export const prerender = false;
+
 const CLOUDFLARE_ORIGIN = 'https://the-crosser.pages.dev';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
