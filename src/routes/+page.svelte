@@ -10,7 +10,13 @@
 	import { initMusic, toggleMute, transitionTo as musicTransition } from '$lib/stores/music';
 
 	function handleStart() {
-		initMusic();
+		// Create and resume AudioContext synchronously inside the tap gesture —
+		// mobile browsers only allow this in a direct user interaction handler.
+		// The async import('tone') in initMusic would break the gesture chain.
+		const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+		const ctx = new AudioCtx();
+		ctx.resume();
+		initMusic(ctx);
 	}
 
 	function handleScreenClick(e: MouseEvent) {

@@ -54,9 +54,12 @@ let masterVol: any = null;
 let loopId: ReturnType<typeof setTimeout> | null = null;
 let currentPhaseIndex: number | null = null;
 
-export async function initMusic() {
+export async function initMusic(audioContext?: AudioContext) {
 	try {
 		Tone = await import('tone');
+		if (audioContext) {
+			Tone.setContext(audioContext);
+		}
 		await Tone.start();
 
 		masterVol = new Tone.Volume(-6).toDestination();
