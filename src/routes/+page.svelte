@@ -9,14 +9,8 @@
 	import { journeyStarted, nextScene, prevScene, muted } from '$lib/stores/scene';
 	import { initMusic, toggleMute, transitionTo as musicTransition } from '$lib/stores/music';
 
-	let musicInitialized = false;
-
-	// Init music when journey starts, reset flag when returning to preloader
-	$: if ($journeyStarted && !musicInitialized) {
-		musicInitialized = true;
+	function handleStart() {
 		initMusic();
-	} else if (!$journeyStarted) {
-		musicInitialized = false;
 	}
 
 	function handleScreenClick(e: MouseEvent) {
@@ -81,7 +75,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="click-zone" on:click={handleScreenClick}>
-	<Preloader />
+	<Preloader on:start={handleStart} />
 
 	{#if $journeyStarted}
 		<SceneBackground />
