@@ -9,30 +9,16 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Check all deployments
+      - name: Check Cloudflare Pages deployment
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
-          SITES=(
-            "https://the-crosser.pages.dev|Cloudflare"
-            "https://the-crosser.vercel.app|Vercel"
-            "https://joshuatza.github.io/the-crosser/|GitHub Pages"
-          )
+          URL="https://the-crosser.pages.dev"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || echo "000")
+          echo "Cloudflare Pages ($URL): $STATUS"
 
-          DOWN=""
-
-          for SITE in "${SITES[@]}"; do
-            URL="${SITE%%|*}"
-            NAME="${SITE##*|}"
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || echo "000")
-            echo "$NAME ($URL): $STATUS"
-            if [ "$STATUS" != "200" ]; then
-              DOWN="$DOWN<li><strong>$NAME</strong> ($URL) — HTTP $STATUS</li>"
-            fi
-          done
-
-          if [ -n "$DOWN" ]; then
-            echo "🚨 Sites down, sending alert..."
+          if [ "$STATUS" != "200" ]; then
+            echo "🚨 Site down, sending alert..."
             curl -s -X POST https://api.resend.com/emails \
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $RESEND_API_KEY" \
@@ -40,9 +26,9 @@ jobs:
                 \"from\": \"The Crosser <onboarding@resend.dev>\",
                 \"to\": [\"joshuatwycross@gmail.com\"],
                 \"subject\": \"⚠️ The Crosser — Site Down Alert\",
-                \"html\": \"<h2>Site Health Alert</h2><p>The following deployments are not responding:</p><ul>$DOWN</ul><p>Fallback order: Cloudflare → Vercel → GitHub Pages (no emails)</p>\"
+                \"html\": \"<h2>Site Health Alert</h2><p>Cloudflare Pages ($URL) is not responding — HTTP $STATUS</p>\"
               }"
             echo "Alert sent."
           else
-            echo "✅ All sites healthy."
+            echo "✅ Site healthy."
           fi
