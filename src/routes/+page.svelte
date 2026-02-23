@@ -7,16 +7,15 @@
 	import Timeline from '$lib/components/Timeline.svelte';
 	import ChapterMenu from '$lib/components/ChapterMenu.svelte';
 	import { journeyStarted, nextScene, prevScene, muted } from '$lib/stores/scene';
-	import { initMusic, toggleMute, transitionTo as musicTransition } from '$lib/stores/music';
+	import { preloadTone, initMusic, toggleMute, transitionTo as musicTransition } from '$lib/stores/music';
+
+	// Pre-load Tone.js so it's ready when user taps (no await in the gesture handler)
+	onMount(() => { preloadTone(); });
 
 	function handleStart() {
-		// Create and resume AudioContext synchronously inside the tap gesture —
-		// mobile browsers only allow this in a direct user interaction handler.
-		// The async import('tone') in initMusic would break the gesture chain.
-		const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-		const ctx = new AudioCtx();
-		ctx.resume();
-		initMusic(ctx);
+		// Tone is already loaded — initMusic calls Tone.start() with no preceding await,
+		// keeping it in the user gesture call stack for iOS Safari.
+		initMusic();
 	}
 
 	function handleScreenClick(e: MouseEvent) {

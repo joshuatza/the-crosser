@@ -54,12 +54,26 @@ let masterVol: any = null;
 let loopId: ReturnType<typeof setTimeout> | null = null;
 let currentPhaseIndex: number | null = null;
 
-export async function initMusic(audioContext?: AudioContext) {
-	try {
+/** Pre-load the Tone.js module so it's ready when the user taps. */
+export async function preloadTone() {
+	if (!Tone) {
 		Tone = await import('tone');
-		if (audioContext) {
-			Tone.setContext(audioContext);
+	}
+}
+
+/**
+ * Start audio. Must be called from a direct user gesture (tap/click).
+ * Tone.js must already be loaded via preloadTone().
+ */
+export async function initMusic() {
+	try {
+		// If preload didn't finish yet, load now (won't unlock on Safari but is a fallback)
+		if (!Tone) {
+			Tone = await import('tone');
 		}
+
+		// Tone.start() must run in the user gesture call stack.
+		// Since Tone is already loaded, no await precedes this call.
 		await Tone.start();
 
 		masterVol = new Tone.Volume(-6).toDestination();
