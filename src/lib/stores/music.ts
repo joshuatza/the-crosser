@@ -62,18 +62,19 @@ export async function preloadTone() {
 }
 
 /**
- * Start audio. Must be called from a direct user gesture (tap/click).
- * Tone.js must already be loaded via preloadTone().
+ * Start audio. Pass a pre-unlocked AudioContext from the user gesture handler
+ * so iOS Safari allows playback.
  */
-export async function initMusic() {
+export async function initMusic(audioContext?: AudioContext) {
 	try {
-		// If preload didn't finish yet, load now (won't unlock on Safari but is a fallback)
 		if (!Tone) {
 			Tone = await import('tone');
 		}
 
-		// Tone.start() must run in the user gesture call stack.
-		// Since Tone is already loaded, no await precedes this call.
+		// Use the pre-unlocked AudioContext from the tap handler
+		if (audioContext) {
+			Tone.setContext(audioContext);
+		}
 		await Tone.start();
 
 		masterVol = new Tone.Volume(-6).toDestination();

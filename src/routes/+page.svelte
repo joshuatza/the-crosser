@@ -9,13 +9,24 @@
 	import { journeyStarted, nextScene, prevScene, muted } from '$lib/stores/scene';
 	import { preloadTone, initMusic, toggleMute, transitionTo as musicTransition } from '$lib/stores/music';
 
-	// Pre-load Tone.js so it's ready when user taps (no await in the gesture handler)
+	// Pre-load Tone.js so it's ready when user taps
 	onMount(() => { preloadTone(); });
 
 	function handleStart() {
-		// Tone is already loaded — initMusic calls Tone.start() with no preceding await,
-		// keeping it in the user gesture call stack for iOS Safari.
-		initMusic();
+		// iOS Safari requires AudioContext to be created AND resumed in a user gesture.
+		// We unlock it here with a silent oscillator, then pass the running context to Tone.
+		const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+		const ctx = new AudioCtx();
+		const osc = ctx.createOscillator();
+		const gain = ctx.createGain();
+		gain.gain.value = 0;
+		osc.connect(gain);
+		gain.connect(ctx.destination);
+		osc.start(0);
+		osc.stop(ctx.currentTime + 0.001);
+		ctx.resume();
+
+		initMusic(ctx);
 	}
 
 	function handleScreenClick(e: MouseEvent) {
