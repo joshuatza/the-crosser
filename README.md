@@ -2,7 +2,8 @@
 
 **A Visual Journey** — an interactive story of blood, exile, and becoming.
 
-[Live site](https://joshuatza.github.io/the-crosser/)
+[[Live site]([https://joshuatza.github.io/the-crosser/](https://the-crosser.pages.dev/))
+](https://the-crosser.pages.dev/)
 
 ## About
 
