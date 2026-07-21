@@ -44,45 +44,45 @@
 		return tokens;
 	}
 
+	// Render the full text at once (so the layout never shifts), with each
+	// word wrapped in a span that fades in on a staggered delay.
 	function typeContent(html: string) {
 		clearTypeTimer();
-		typedHTML = '';
-		visible = true;
 
 		const tokens = tokenize(html);
-		let idx = 0;
+		let out = '';
+		let t = 400;
+		const wordTimes: number[] = [];
 
-		function typeNext() {
-			if (idx >= tokens.length) return;
-			const token = tokens[idx];
-			typedHTML += token;
-			idx++;
-
-			// Tags and whitespace appear instantly, words get the pen sound
+		for (const token of tokens) {
 			const isTag = token.startsWith('<');
 			const isSpace = token.trim() === '';
-
-			if (!isTag && !isSpace) {
-				penScratch();
-			}
-
-			// Tags: no delay. Spaces: tiny delay. Words: typing speed.
-			let delay: number;
-			if (isTag) {
-				delay = 0;
-			} else if (isSpace) {
-				delay = 10;
+			if (isTag || isSpace) {
+				out += token;
 			} else {
-				delay = 30 + Math.random() * 30;
-			}
-
-			if (idx < tokens.length) {
-				typeTimer = setTimeout(typeNext, delay);
+				out += `<span class="type-word" style="animation-delay:${t}ms">${token}</span>`;
+				wordTimes.push(t);
+				t += 90 + Math.random() * 40;
 			}
 		}
 
-		// Small delay before typing starts
-		typeTimer = setTimeout(typeNext, 400);
+		typedHTML = out;
+		visible = true;
+
+		// Pen sound synced to each word's reveal
+		let i = 0;
+		let prev = 0;
+		function scratchNext() {
+			if (i >= wordTimes.length) return;
+			const delay = wordTimes[i] - prev;
+			prev = wordTimes[i];
+			typeTimer = setTimeout(() => {
+				penScratch();
+				i++;
+				scratchNext();
+			}, delay);
+		}
+		scratchNext();
 	}
 
 	$: if (scene) {
@@ -137,6 +137,30 @@
 		opacity: 0;
 		transform: translateY(-20px);
 		transition: opacity 0.6s ease, transform 0.6s ease;
+	}
+
+	:global(.type-word) {
+		display: inline-block;
+		opacity: 0;
+		animation: word-in 0.7s ease forwards;
+	}
+
+	@keyframes -global-word-in {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(.type-word) {
+			animation: none;
+			opacity: 1;
+		}
 	}
 
 	:global(.scene-heading) {
