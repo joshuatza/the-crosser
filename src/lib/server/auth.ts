@@ -1,3 +1,5 @@
+import type { KVNamespace } from '@cloudflare/workers-types';
+
 const MAGIC_PREFIX = 'magic_';
 const SESSION_PREFIX = 'session_';
 const MAGIC_TTL = 60 * 15; // 15 minutes
